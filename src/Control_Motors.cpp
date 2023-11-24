@@ -1,6 +1,9 @@
 #include "Control_Motors.h"
 
 //STRUCTURE########################################################################################################
+
+//以下为电机基本设置/配置
+
 //--no remote mode------------------------------------------------------------------------------------
 Control_Motors::Control_Motors(int *MotorList,int MotorNumbers)
 {
@@ -61,30 +64,31 @@ Control_Motors::~Control_Motors()
 
 }
 
+//以上为电机基本设置/配置
 
 //FUNCTION######################################################################################################################
 /*public*********************************************************************************************/
 void Control_Motors::SetUp(int *list)
 {
-	//set motor name
+	//set motor name设置电机名称
   char motorname[] = {"MyMotors"};
 	SetMotorsName(motorname);
 
-	//creat motor list
+	//creat motor list	设置电机列表
 	CreatMotors(list);
 	SetStopMode();
 
-	//set control button if remote mode
+	//set control button if remote mode	设置操作阶段控制按钮
 	if(RemoteMode && MyJoystic != NULL)
 	{
 		RunFwd = &(*MyJoystic).ButtonL1;
 		RunRev = &(*MyJoystic).ButtonL2;
 	}
 
-	//reset rotation
+	//reset rotation设置初始角度
 	SetMotorsRotation(0);
 
-	//creat encoder value Array ，start value -1
+	//creat encoder value Array ，start value -1	设置编码器
 	Sensorvalue =  new int[MyMotorNumbers];
 	lastvalue = new int[MyMotorNumbers];
 	for (int i = 0; i < MyMotorNumbers; ++i)
@@ -95,7 +99,8 @@ void Control_Motors::SetUp(int *list)
 }
 
 //------------run -----------------------------------------------------------------------
-void Control_Motors::RunMotors(int Pwr)
+//通过电压，功率等使电机转动
+void Control_Motors::RunMotors(int Pwr)//单电机
 {
 	for (int i = 0; i < MyMotorNumbers; ++i)
 	{
@@ -103,7 +108,7 @@ void Control_Motors::RunMotors(int Pwr)
 	}
 }
 
-void Control_Motors::RunMotors(int *Pwr)
+void Control_Motors::RunMotors(int *Pwr)//多电机
 {
 	for (int i = 0; i < MyMotorNumbers; ++i)
 	{
@@ -144,6 +149,7 @@ void Control_Motors::RunMotors(double *Vol, vex::voltageUnits Myvoltage)
 }
 
 //remote mode-----------------------------------------------------------------------------
+//通过电机（组）前后方向功率控制电机
 void Control_Motors::RemoteMotors(int Pwr)
 {
 	if((*RunFwd).pressing())		RunMotors(Pwr);
@@ -179,6 +185,7 @@ void Control_Motors::RemoteMotors(int *PwrFwd,int *PwrRev)
 
 //run motor rotation, defualt mode rotation-->deg,  user can change mode with function==>"SetMotorsRotation(int value,vex::rotationUnits RotationUnits)"
 //the function just give command to the motor,the robot can do other function at sametimes
+//转向特定角度
 void Control_Motors::RunMotorsRotation(double RotationValue, int PwrOfMotor)
 {
 	SetMotorsRotation(0);
@@ -188,18 +195,21 @@ void Control_Motors::RunMotorsRotation(double RotationValue, int PwrOfMotor)
 	}
 }
 
+//停止所有电机
 void Control_Motors::StopMotors(void)
 {
 	for (int i = 0; i < MyMotorNumbers; ++i)	MyMotorList[i].stop();
 }
 
 //set----------------------------------------------------------
+//设置停止模式
 void Control_Motors::SetStopMode(vex::brakeType BreakMode)
 {
 	MyBreakMode = BreakMode;
 	SetStopMode();
 }
 
+//设置电机多长时间未转到指定角度所使用的最长时间，如未完成则停止
 void Control_Motors::SetTimeOut(int TimeMsValue)
 {
 	for (int i = 0; i < MyMotorNumbers; ++i)
@@ -208,6 +218,7 @@ void Control_Motors::SetTimeOut(int TimeMsValue)
 	}
 }
 
+//设置电机名称
 void Control_Motors::SetMotorsName(char *name)
 {
 	MyMotorsName = name;
@@ -217,6 +228,7 @@ void Control_Motors::SetMotorsName(char *name)
 	#endif
 }
 
+//设置最大扭矩
 void Control_Motors::SetMaxTorque(int percent)
 {
   for(int i = 0; i < MyMotorNumbers; ++i)
@@ -225,11 +237,13 @@ void Control_Motors::SetMaxTorque(int percent)
   }
 }
 
+//设置电机角度
 void Control_Motors::SetMotorsRotation(int value)
 {
 	SetMotorsRotation(value,MyRotationUnits);
 }
 
+//设置电机角度
 void Control_Motors::SetMotorsRotation(int value,vex::rotationUnits RotationUnits)
 {
 	for (int i = 0; i < MyMotorNumbers; ++i)
@@ -243,12 +257,14 @@ void Control_Motors::SetMotorsRotation(int value,vex::rotationUnits RotationUnit
 	#endif
 }
 
+//获取传感器角度
 int* Control_Motors::GetSensorValue(void)
 {
 	GetRotationValue();
 	return Sensorvalue;
 }
 
+//获取转速
 int Control_Motors::GetRpm(int motorNumber)
 {
   int val;
@@ -258,6 +274,7 @@ int Control_Motors::GetRpm(int motorNumber)
   return val;
 }
 
+//获取速度
 int Control_Motors::GetSpeed(int motorNumber)
 {
   int val;
@@ -268,12 +285,14 @@ int Control_Motors::GetSpeed(int motorNumber)
 }
 
 //set encoder class----------------------------------------------------------
+//设置编码器
 void Control_Motors::SetMyEncoder(vex::encoder *Encoder)
 {
 	MyEncoder = Encoder;
 	(*MyEncoder).resetRotation();
 }
 
+//获取编码器角度
 int Control_Motors::GetEncoderValue_Deg(void)
 {
 	return (*MyEncoder).rotation(vex::rotationUnits::deg);
@@ -281,6 +300,7 @@ int Control_Motors::GetEncoderValue_Deg(void)
 
 
 /*protected**********************************************************************************************************************/
+//创建新电机（组）
 void Control_Motors::CreatMotors(int *MotorList)
 {
 	 MyMotorList = (vex::motor*) operator new  (sizeof(vex::motor) * MyMotorNumbers);
@@ -294,6 +314,7 @@ void Control_Motors::CreatMotors(int *MotorList)
 	 }
 }
 
+//设置停止模式
 void Control_Motors::SetStopMode(void)
 {
 	for(int i = 0; i < MyMotorNumbers;++i)
@@ -306,6 +327,7 @@ void Control_Motors::SetStopMode(void)
 	#endif
 }
 
+//获取角度
 void Control_Motors::GetRotationValue(void)
 {
 	for (int i = 0; i < MyMotorNumbers; ++i)
@@ -315,6 +337,7 @@ void Control_Motors::GetRotationValue(void)
 }
 
 //debug:public**********************************************************************************************************
+//调试模式
 #if Control_Motors_DEBUG
 void Control_Motors::ShowDebugData(int StartLine,int StartList)
 {
@@ -358,6 +381,7 @@ void Control_Motors::ShowMotorValue(int startLine)
 		}
 	}
 }
+
 
 void Control_Motors::printMotorName(void)
 {

@@ -4,6 +4,8 @@
 //sensor
 /*gyro MyGyro = gyro(Brain.ThreeWirePort.H);
 line MyLineTracker = line(Brain.ThreeWirePort.B);*/
+
+//电机设置----------------------------------
 //PAW
                //port 16-gear head
 int PawMotor[] = {2,1,0,
@@ -27,6 +29,9 @@ Control_Motors InTakeRoll = Control_Motors(InTakeMotor,1);
                     //port 16-gear head
 int OutPutMotor[] = {4,1,0};
 Control_Motors OutPutRoll = Control_Motors(OutPutMotor,1);
+
+
+
 
 
 void  AutoProRight(int LineTrackerValue)
